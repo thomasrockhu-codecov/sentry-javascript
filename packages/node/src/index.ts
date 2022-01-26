@@ -1,4 +1,4 @@
-export {
+export type {
   Breadcrumb,
   BreadcrumbHint,
   Request,
@@ -15,6 +15,8 @@ export {
   Thread,
   User,
 } from '@sentry/types';
+
+export type { NodeOptions } from './types';
 
 export {
   addGlobalEventProcessor,
@@ -40,7 +42,6 @@ export {
   withScope,
 } from '@sentry/core';
 
-export { NodeOptions } from './types';
 export { NodeClient } from './client';
 export { defaultIntegrations, init, lastEventId, flush, close, getSentryRelease } from './sdk';
 export { deepReadDirSync } from './utils';

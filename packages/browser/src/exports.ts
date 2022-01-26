@@ -1,4 +1,4 @@
-export {
+export type {
   Breadcrumb,
   BreadcrumbHint,
   Request,
@@ -15,6 +15,9 @@ export {
   Thread,
   User,
 } from '@sentry/types';
+
+export type { BrowserOptions } from './client';
+export type { ReportDialogOptions } from './helpers';
 
 export {
   addGlobalEventProcessor,
@@ -40,8 +43,7 @@ export {
   withScope,
 } from '@sentry/core';
 
-export { BrowserClient, BrowserOptions } from './client';
-
+export { BrowserClient } from './client';
 export {
   defaultStackParsers,
   chromeStackParser,
@@ -50,6 +52,6 @@ export {
   opera11StackParser,
   winjsStackParser,
 } from './stack-parsers';
-export { injectReportDialog, ReportDialogOptions } from './helpers';
+export { injectReportDialog } from './helpers';
 export { defaultIntegrations, forceLoad, init, lastEventId, onLoad, showReportDialog, flush, close, wrap } from './sdk';
 export { SDK_NAME } from './version';
