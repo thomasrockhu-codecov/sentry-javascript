@@ -287,6 +287,13 @@ export function makeBaseNPMConfig(options = {}) {
   const sucrasePlugin = sucrase({
     transforms: ['typescript'],
   });
+
+  const constToVarPlugin = replace({
+    values: {
+      'const ': 'var ',
+    },
+  });
+
   return {
     input: entrypoint || 'src/index.ts',
     output: {
@@ -321,7 +328,7 @@ export function makeBaseNPMConfig(options = {}) {
       // `esModule` -> don't emit helpers
       interop: esModuleInterop ? 'auto' : 'esModule',
     },
-    plugins: [nodeResolvePlugin, sucrasePlugin],
+    plugins: [nodeResolvePlugin, sucrasePlugin, constToVarPlugin],
     // don't include imported modules from outside the package in the final output
     external: [
       ...builtinModules,
