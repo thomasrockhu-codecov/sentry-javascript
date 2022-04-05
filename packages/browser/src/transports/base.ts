@@ -109,7 +109,7 @@ export abstract class BaseTransport implements Transport {
     // would be `Partial<Record<SentryRequestType, Partial<Record<Outcome, number>>>>`
     const key = `${requestTypeToCategory(category)}:${reason}`;
     IS_DEBUG_BUILD && logger.log(`Adding outcome: ${key}`);
-    this._outcomes[key] = (this._outcomes[key] ?? 0) + 1;
+    this._outcomes[key] = (this._outcomes[key] || 0) + 1;
   }
 
   /**
