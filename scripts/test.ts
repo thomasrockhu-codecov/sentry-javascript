@@ -14,8 +14,8 @@ const nodeMajorVersion = parseInt(process.version.split('.')[0].replace('v', '')
 if (nodeMajorVersion <= 8) {
   // install legacy versions of packages whose current versions don't support node 8
   // ignoring engines and scripts lets us get away with having incompatible things installed for packages we're not testing
-  run('yarn add --dev --ignore-engines --ignore-scripts jsdom@15.x', 'packages/tracing');
-  run('yarn add --dev --ignore-engines --ignore-scripts jsdom@15.x', 'packages/utils');
+  run('yarn add --dev --ignore-engines --ignore-scripts jsdom@15.x jest@26.2.2', 'packages/tracing');
+  run('yarn add --dev --ignore-engines --ignore-scripts jsdom@15.x jest@26.2.2', 'packages/utils');
 
   // ember tests happen separately, and the rest fail on node 8 for various syntax or dependency reasons
   const ignore = [
