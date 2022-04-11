@@ -68,7 +68,7 @@ describe('BaseClient', () => {
       expect.assertions(1);
 
       const client = new TestClient({ dsn: PUBLIC_DSN });
-      expect(dsnToString(client.getDsn())).toBe(PUBLIC_DSN);
+      expect(dsnToString(client.getDsn()!)).toBe(PUBLIC_DSN);
     });
 
     test('allows missing Dsn', () => {
