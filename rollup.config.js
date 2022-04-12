@@ -380,11 +380,11 @@ export function makeBaseNPMConfig(options = {}) {
   };
 }
 
-export function makeNPMConfigVariants(baseConfig) {
+export function makeNPMConfigVariants(baseConfig, hasBundles = false) {
   const variantSpecificConfigs = [
     // TODO change dist to cjs
-    { output: { format: 'cjs', dir: 'build/cjs' } },
-    { output: { format: 'esm', dir: 'build/esm' } },
+    { output: { format: 'cjs', dir: hasBundles ? 'build/npm/cjs' : 'build/cjs' } },
+    { output: { format: 'esm', dir: hasBundles ? 'build/npm/esm' : 'build/esm' } },
   ];
 
   return variantSpecificConfigs.map(variant => deepMerge(baseConfig, variant));
