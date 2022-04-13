@@ -319,7 +319,7 @@ export function makeBaseNPMConfig(options = {}) {
   };
 
   const sucrasePlugin = sucrase({
-    transforms: ['typescript'],
+    transforms: ['typescript', 'jsx'],
   });
 
   const constToVarPlugin = replace({
