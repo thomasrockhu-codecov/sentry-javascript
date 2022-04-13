@@ -70,7 +70,6 @@
     "chai": "^4.1.2",
     "codecov": "^3.6.5",
     "deepmerge": "^4.2.2",
-    "esbuild": "^0.14.32",
     "eslint": "7.32.0",
     "jest": "^27.5.1",
     "jest-environment-node": "^27.5.1",
