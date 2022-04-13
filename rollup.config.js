@@ -69,8 +69,9 @@ function makeLicensePlugin(title) {
 
 function makeIsDebugBuildPlugin(includeDebugging) {
   return replace({
+    // TODO `preventAssignment` will default to true in version 5.x of the replace plugin, at which point we can get rid of this
     // __SENTRY_DEBUG__ should be save to replace in any case, so no checks for assignments necessary
-    preventAssignment: false,
+    preventAssignment: true,
     values: {
       __SENTRY_DEBUG__: includeDebugging,
     },
@@ -147,9 +148,9 @@ export function makeBaseBundleConfig(options) {
   );
 
   const markAsBrowserBuildPlugin = replace({
-    // don't replace `__placeholder__` where it's followed immediately by a single `=` (to prevent ending up
-    // with something of the form `let "replacementValue" = "some assigned value"`, which would cause a
-    // syntax error)
+    // TODO `preventAssignment` will default to true in version 5.x of the replace plugin, at which point we can get rid of this
+    // Don't replace `__placeholder__` where it's followed immediately by a single `=` (to prevent ending up with
+    // something of the form `let "replacementValue" = "some assigned value"`, which would cause a syntax error)
     preventAssignment: true,
     // the replacement to make
     values: {
