@@ -323,6 +323,10 @@ export function makeBaseNPMConfig(options = {}) {
   });
 
   const constToVarPlugin = replace({
+    // TODO `preventAssignment` will default to true in version 5.x of the replace plugin, at which point we can get rid
+    // of this. (It actually makes no difference in this case whether it's true or false, but if we don't give it a
+    // value, it will spam with warnings.)
+    preventAssignment: true,
     values: {
       'const ': 'var ',
     },
