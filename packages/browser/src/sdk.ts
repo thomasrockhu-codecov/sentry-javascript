@@ -98,8 +98,7 @@ export function init(options: BrowserOptions = {}): void {
     options.stackParser = defaultStackParsers;
   }
 
-  const { transport, newTransport } = setupBrowserTransport(options);
-  initAndBind(BrowserClient, options, transport, newTransport);
+  initAndBind(BrowserClient, options, setupBrowserTransport(options));
 
   if (options.autoSessionTracking) {
     startSessionTracking();

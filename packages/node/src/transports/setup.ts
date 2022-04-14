@@ -16,7 +16,7 @@ export function setupNodeTransport(options: NodeOptions): NewTransport {
     ...(options.caCerts && { caCerts: options.caCerts }),
     // @ts-ignore Come back to this
     // TODO(v7): Figure out how to enforce dsn
-    dsn: options.dsn === undefined ? undefined : makeDsn(options.dsn),
+    dsn: options.dsn,
     tunnel: options.tunnel,
     _metadata: options._metadata,
   };
