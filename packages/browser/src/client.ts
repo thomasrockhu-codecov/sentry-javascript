@@ -1,5 +1,5 @@
-import { BaseClient, NewTransport, Scope, SDK_VERSION } from '@sentry/core';
-import { Event, EventHint, Options, Severity, SeverityLevel, Transport } from '@sentry/types';
+import { BaseClient, Scope, SDK_VERSION } from '@sentry/core';
+import { Event, EventHint, NewTransport, Options, Severity, SeverityLevel } from '@sentry/types';
 import { getGlobalObject, logger, stackParserFromOptions } from '@sentry/utils';
 
 import { eventFromException, eventFromMessage } from './eventbuilder';

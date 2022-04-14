@@ -1,6 +1,5 @@
 import { getEnvelopeEndpointWithUrlEncodedAuth, initAPIDetails } from '@sentry/core';
 import { NewTransport, TransportOptions } from '@sentry/types';
-import { makeDsn } from '@sentry/utils';
 
 import { NodeOptions } from '../types';
 import { makeNodeTransport } from './new';
