@@ -20,7 +20,7 @@ export class NodeClient extends BaseClient<NodeOptions> {
    * Creates a new Node SDK instance.
    * @param options Configuration options for this SDK.
    */
-  public constructor(options: NodeOptions, transport: Transport, newTransport?: NewTransport) {
+  public constructor(options: NodeOptions, transport: NewTransport) {
     options._metadata = options._metadata || {};
     options._metadata.sdk = options._metadata.sdk || {
       name: 'sentry.javascript.node',
@@ -33,7 +33,7 @@ export class NodeClient extends BaseClient<NodeOptions> {
       version: SDK_VERSION,
     };
 
-    super(options, transport, newTransport);
+    super(options, transport);
   }
 
   /**
