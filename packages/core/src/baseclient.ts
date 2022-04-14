@@ -7,6 +7,7 @@ import {
   EventHint,
   Integration,
   IntegrationClass,
+  NewTransport,
   Options,
   Severity,
   SeverityLevel,
@@ -29,11 +30,10 @@ import {
   uuid4,
 } from '@sentry/utils';
 
-import { APIDetails, initAPIDetails } from './api';
+import { initAPIDetails } from './api';
 import { IS_DEBUG_BUILD } from './flags';
 import { IntegrationIndex, setupIntegrations } from './integration';
 import { createEventEnvelope, createSessionEnvelope } from './request';
-import { NewTransport } from './transports/base';
 
 const ALREADY_SEEN_ERROR = "Not capturing exception because it's already been captured.";
 
@@ -82,10 +82,7 @@ export abstract class BaseClient<O extends Options> implements Client<O> {
   protected _numProcessing: number = 0;
 
   /** Cached transport used internally. */
-  protected _transport: Transport;
-
-  /** New v7 Transport that is initialized alongside the old one */
-  protected _newTransport?: NewTransport;
+  protected _transport: NewTransport;
 
   /**
    * Initializes this client instance.
@@ -94,7 +91,7 @@ export abstract class BaseClient<O extends Options> implements Client<O> {
    * @param transport The (old) Transport instance for the client to use (TODO(v7): remove)
    * @param newTransport The NewTransport instance for the client to use
    */
-  protected constructor(options: O, transport: Transport, newTransport?: NewTransport) {
+  protected constructor(options: O, transport: NewTransport) {
     this._options = options;
 
     if (options.dsn) {
@@ -103,16 +100,7 @@ export abstract class BaseClient<O extends Options> implements Client<O> {
       IS_DEBUG_BUILD && logger.warn('No DSN provided, client will not do anything.');
     }
 
-    // TODO(v7): remove old transport
     this._transport = transport;
-    this._newTransport = newTransport;
-
-    // TODO(v7): refactor this to keep metadata/api outside of transport. This hack is used to
-    //           satisfy tests until we move to NewTransport where we have to revisit this.
-    (this._transport as unknown as { _api: Partial<APIDetails> })._api = {
-      ...((this._transport as unknown as { _api: Partial<APIDetails> })._api || {}),
-      metadata: options._metadata || {},
-    };
   }
 
   /**
@@ -222,7 +210,7 @@ export abstract class BaseClient<O extends Options> implements Client<O> {
   /**
    * @inheritDoc
    */
-  public getTransport(): Transport {
+  public getTransport(): NewTransport {
     return this._transport;
   }
 
@@ -232,7 +220,7 @@ export abstract class BaseClient<O extends Options> implements Client<O> {
   public flush(timeout?: number): PromiseLike<boolean> {
     return this._isClientDoneProcessing(timeout).then(clientFinished => {
       return this.getTransport()
-        .close(timeout)
+        .flush(timeout)
         .then(transportFlushed => clientFinished && transportFlushed);
     });
   }
@@ -272,20 +260,11 @@ export abstract class BaseClient<O extends Options> implements Client<O> {
    * @inheritDoc
    */
   public sendEvent(event: Event): void {
-    // TODO(v7): Remove the if-else
-    if (
-      this._newTransport &&
-      this._options.dsn &&
-      this._options._experiments &&
-      this._options._experiments.newTransport
-    ) {
+    if (this._options.dsn) {
       const api = initAPIDetails(this._options.dsn, this._options._metadata, this._options.tunnel);
       const env = createEventEnvelope(event, api);
-      void this._newTransport.send(env).then(null, reason => {
-        IS_DEBUG_BUILD && logger.error('Error while sending event:', reason);
-      });
-    } else {
-      void this._transport.sendEvent(event).then(null, reason => {
+      // TODO: Adjust client reports based on transport response
+      void this._transport.send(env).then(null, reason => {
         IS_DEBUG_BUILD && logger.error('Error while sending event:', reason);
       });
     }
@@ -295,25 +274,11 @@ export abstract class BaseClient<O extends Options> implements Client<O> {
    * @inheritDoc
    */
   public sendSession(session: Session): void {
-    if (!this._transport.sendSession) {
-      IS_DEBUG_BUILD && logger.warn("Dropping session because custom transport doesn't implement sendSession");
-      return;
-    }
-
-    // TODO(v7): Remove the if-else
-    if (
-      this._newTransport &&
-      this._options.dsn &&
-      this._options._experiments &&
-      this._options._experiments.newTransport
-    ) {
+    if (this._options.dsn) {
       const api = initAPIDetails(this._options.dsn, this._options._metadata, this._options.tunnel);
       const [env] = createSessionEnvelope(session, api);
-      void this._newTransport.send(env).then(null, reason => {
-        IS_DEBUG_BUILD && logger.error('Error while sending session:', reason);
-      });
-    } else {
-      void this._transport.sendSession(session).then(null, reason => {
+      // TODO: Adjust client reports based on transport response
+      void this._transport.send(env).then(null, reason => {
         IS_DEBUG_BUILD && logger.error('Error while sending session:', reason);
       });
     }
@@ -595,15 +560,16 @@ export abstract class BaseClient<O extends Options> implements Client<O> {
   protected _processEvent(event: Event, hint?: EventHint, scope?: Scope): PromiseLike<Event> {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const { beforeSend, sampleRate } = this.getOptions();
-    const transport = this.getTransport();
+    // const transport = this.getTransport();
 
     type RecordLostEvent = NonNullable<Transport['recordLostEvent']>;
     type RecordLostEventParams = Parameters<RecordLostEvent>;
 
-    function recordLostEvent(outcome: RecordLostEventParams[0], category: RecordLostEventParams[1]): void {
-      if (transport.recordLostEvent) {
-        transport.recordLostEvent(outcome, category);
-      }
+    // TODO(v7): Make client reports work with new transports
+    function recordLostEvent(_outcome: RecordLostEventParams[0], _category: RecordLostEventParams[1]): void {
+      // if (transport.recordLostEvent) {
+      // transport.recordLostEvent(outcome, category);
+      // }
     }
 
     if (!this._isEnabled()) {
