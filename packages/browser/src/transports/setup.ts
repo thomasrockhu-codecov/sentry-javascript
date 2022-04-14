@@ -21,8 +21,7 @@ export interface BrowserTransportOptions extends BaseTransportOptions {
 export function setupBrowserTransport(options: BrowserOptions): NewTransport {
   const transportOptions: TransportOptions = {
     ...options.transportOptions,
-    // @ts-ignore figure out dsn stuff
-    dsn: options.dsn,
+    dsn: options.dsn || '',
     tunnel: options.tunnel,
     sendClientReports: options.sendClientReports,
     _metadata: options._metadata,
