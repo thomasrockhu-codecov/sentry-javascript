@@ -1,11 +1,11 @@
+import { createTransport } from '@sentry/core';
 import {
   BaseTransportOptions,
-  createTransport,
   NewTransport,
   TransportMakeRequestResponse,
   TransportRequest,
   TransportRequestExecutor,
-} from '@sentry/core';
+} from '@sentry/types';
 import { eventStatusFromHttpCode } from '@sentry/utils';
 import * as http from 'http';
 import * as https from 'https';

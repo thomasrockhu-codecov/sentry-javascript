@@ -5,7 +5,7 @@ import { CaptureContext } from './scope';
 import { SdkMetadata } from './sdkmetadata';
 import { StackLineParser, StackParser } from './stacktrace';
 import { SamplingContext } from './transaction';
-import { Transport, TransportClass, TransportOptions } from './transport';
+import { NewTransport, TransportOptions } from './transport';
 
 /** Base configuration options for every SDK. */
 export interface Options {
@@ -49,7 +49,7 @@ export interface Options {
   /**
    * Transport object that should be used to send events to Sentry
    */
-  transport?: TransportClass<Transport>;
+  transport?: NewTransport;
 
   /**
    * Options for the default transport that the SDK uses.

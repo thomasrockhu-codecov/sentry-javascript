@@ -131,8 +131,8 @@ export function init(options: NodeOptions = {}): void {
     setHubOnCarrier(carrier, getCurrentHub());
   }
 
-  const { transport, newTransport } = setupNodeTransport(options);
-  initAndBind(NodeClient, options, transport, newTransport);
+  const { transport } = setupNodeTransport(options);
+  initAndBind(NodeClient, options, transport);
 
   if (options.autoSessionTracking) {
     startSessionTracking();
