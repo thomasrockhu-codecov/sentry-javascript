@@ -1,11 +1,16 @@
 import {
   AggregationCounts,
+  DsnComponents,
+  NewTransport,
   RequestSessionStatus,
+  SdkMetadata,
+  SentryRequestType,
   SessionAggregates,
+  SessionEnvelope,
   SessionFlusherLike,
-  Transport,
+  SessionItem,
 } from '@sentry/types';
-import { dropUndefinedKeys, logger } from '@sentry/utils';
+import { createEnvelope, dropUndefinedKeys, dsnToString, logger } from '@sentry/utils';
 
 import { IS_DEBUG_BUILD } from './flags';
 import { getCurrentHub } from './hub';
@@ -16,6 +21,35 @@ type ReleaseHealthAttributes = {
 };
 
 /**
+ * Creates an envelope from a Session
+ *
+ * This is copied from @sentry/core/src/request.ts
+ * TODO(v7): Unify session envelope creation
+ **/
+export function createSessionEnvelope(
+  sessionAggregates: SessionAggregates,
+  dsn: DsnComponents,
+  metadata: SdkMetadata,
+  tunnel?: string,
+): SessionEnvelope {
+  const sdkInfo = metadata;
+  const envelopeHeaders = {
+    sent_at: new Date().toISOString(),
+    ...(sdkInfo && { sdk: sdkInfo }),
+    ...(!!tunnel && { dsn: dsnToString(dsn) }),
+  };
+
+  // I know this is hacky but we don't want to add `sessions` to request type since it's never rate limited
+  const type = 'aggregates' in sessionAggregates ? ('sessions' as SentryRequestType) : 'session';
+
+  // TODO (v7) Have to cast type because envelope items do not accept a `SentryRequestType`
+  const envelopeItem = [{ type } as { type: 'session' | 'sessions' }, sessionAggregates] as SessionItem;
+  const envelope = createEnvelope<SessionEnvelope>(envelopeHeaders, [envelopeItem]);
+
+  return envelope;
+}
+
+/**
  * @inheritdoc
  */
 export class SessionFlusher implements SessionFlusherLike {
@@ -24,9 +58,15 @@ export class SessionFlusher implements SessionFlusherLike {
   private _sessionAttrs: ReleaseHealthAttributes;
   private _intervalId: ReturnType<typeof setInterval>;
   private _isEnabled: boolean = true;
-  private _transport: Transport;
+  private _transport: NewTransport;
 
-  public constructor(transport: Transport, attrs: ReleaseHealthAttributes) {
+  public constructor(
+    transport: NewTransport,
+    attrs: ReleaseHealthAttributes,
+    private readonly _dsn: DsnComponents,
+    private readonly _metadata: SdkMetadata,
+    private readonly _tunnel?: string,
+  ) {
     this._transport = transport;
     // Call to setInterval, so that flush is called every 60 seconds
     this._intervalId = setInterval(() => this.flush(), this.flushTimeout * 1000);
@@ -35,11 +75,8 @@ export class SessionFlusher implements SessionFlusherLike {
 
   /** Sends session aggregates to Transport */
   public sendSessionAggregates(sessionAggregates: SessionAggregates): void {
-    if (!this._transport.sendSession) {
-      IS_DEBUG_BUILD && logger.warn("Dropping session because custom transport doesn't implement sendSession");
-      return;
-    }
-    void this._transport.sendSession(sessionAggregates).then(null, reason => {
+    const env = createSessionEnvelope(sessionAggregates, this._dsn, this._metadata, this._tunnel);
+    void this._transport.send(env).then(null, reason => {
       IS_DEBUG_BUILD && logger.error('Error while sending session:', reason);
     });
   }

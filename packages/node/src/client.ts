@@ -1,6 +1,6 @@
-import { BaseClient, NewTransport, Scope, SDK_VERSION } from '@sentry/core';
+import { BaseClient, initAPIDetails, NewTransport, Scope, SDK_VERSION } from '@sentry/core';
 import { SessionFlusher } from '@sentry/hub';
-import { Event, EventHint, Severity, SeverityLevel, Transport } from '@sentry/types';
+import { Event, EventHint, Severity, SeverityLevel } from '@sentry/types';
 import { logger, resolvedSyncPromise, stackParserFromOptions } from '@sentry/utils';
 
 import { eventFromMessage, eventFromUnknownInput } from './eventbuilder';
@@ -99,10 +99,19 @@ export class NodeClient extends BaseClient<NodeOptions> {
     if (!release) {
       IS_DEBUG_BUILD && logger.warn('Cannot initialise an instance of SessionFlusher if no release is provided!');
     } else {
-      this._sessionFlusher = new SessionFlusher(this.getTransport(), {
-        release,
-        environment,
-      });
+      if (this._options.dsn) {
+        const api = initAPIDetails(this._options.dsn, this._options._metadata, this._options.tunnel);
+        this._sessionFlusher = new SessionFlusher(
+          this.getTransport(),
+          {
+            release,
+            environment,
+          },
+          api.dsn,
+          api.metadata,
+          api.tunnel,
+        );
+      }
     }
   }
 
