@@ -39,7 +39,7 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
    *
    * @param options Configuration options for this SDK.
    */
-  public constructor(options: BrowserOptions = {}, transport: Transport, newTransport?: NewTransport) {
+  public constructor(options: BrowserOptions = {}, transport: NewTransport) {
     options._metadata = options._metadata || {};
     options._metadata.sdk = options._metadata.sdk || {
       name: 'sentry.javascript.browser',
@@ -52,7 +52,7 @@ export class BrowserClient extends BaseClient<BrowserOptions> {
       version: SDK_VERSION,
     };
 
-    super(options, transport, newTransport);
+    super(options, transport);
   }
 
   /**
