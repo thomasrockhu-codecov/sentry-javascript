@@ -1,11 +1,10 @@
 import { Session } from '@sentry/hub';
-import { Event, Integration, Options, Severity, SeverityLevel, Transport } from '@sentry/types';
-import { resolvedSyncPromise } from '@sentry/utils';
+import { Event, Integration, Options, Severity, SeverityLevel, NewTransport, EventStatus } from '@sentry/types';
+import { resolvedSyncPromise, resolve } from '@sentry/utils';
 
 import { BaseClient } from '../../src/baseclient';
 import { initAndBind } from '../../src/sdk';
-import { NewTransport } from '../../src/transports/base';
-import { NoopTransport } from '../../src/transports/noop';
+
 export interface TestOptions extends Options {
   test?: boolean;
   mockInstallFailure?: boolean;
@@ -20,8 +19,8 @@ export class TestClient extends BaseClient<TestOptions> {
   public event?: Event;
   public session?: Session;
 
-  public constructor(options: TestOptions, transport: Transport, newTransport?: NewTransport) {
-    super(options, transport, newTransport);
+  public constructor(options: TestOptions, transport: NewTransport) {
+    super(options, transport);
     TestClient.instance = this;
   }
 
@@ -64,22 +63,27 @@ export class TestClient extends BaseClient<TestOptions> {
   }
 }
 
-export function init(options: TestOptions, transport: Transport, newTransport?: NewTransport): void {
-  initAndBind(TestClient, options, transport, newTransport);
+export function init(options: TestOptions, transport: NewTransport): void {
+  initAndBind(TestClient, options, transport);
 }
 
-export function setupTestTransport(options: TestOptions): { transport: Transport; newTransport?: NewTransport } {
-  const noop = { transport: new NoopTransport() };
+export function setupTestTransport(options: TestOptions): NewTransport {
+  const noop = {
+    send: () =>
+      resolvedSyncPromise({
+        reason: 'NoopTransport: Event has been skipped because no Dsn is configured.',
+        status: 'skipped' as EventStatus,
+      }),
+    flush: () => resolvedSyncPromise(true),
+  };
 
   if (!options.dsn) {
     // We return the noop transport here in case there is no Dsn.
     return noop;
   }
 
-  const transportOptions = options.transportOptions ? options.transportOptions : { dsn: options.dsn };
-
   if (options.transport) {
-    return { transport: new this._options.transport(transportOptions) };
+    return this._options.transport;
   }
 
   return noop;
