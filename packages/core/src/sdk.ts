@@ -1,16 +1,11 @@
 import { getCurrentHub } from '@sentry/hub';
-import { Client, Options, Transport } from '@sentry/types';
+import { Client, NewTransport, Options } from '@sentry/types';
 import { logger } from '@sentry/utils';
 
 import { IS_DEBUG_BUILD } from './flags';
-import { NewTransport } from './transports/base';
 
 /** A class object that can instantiate Client objects. */
-export type ClientClass<F extends Client, O extends Options> = new (
-  options: O,
-  transport: Transport,
-  newTransport?: NewTransport,
-) => F;
+export type ClientClass<F extends Client, O extends Options> = new (options: O, transport: NewTransport) => F;
 
 /**
  * Internal function to create a new SDK client instance. The client is
@@ -22,8 +17,7 @@ export type ClientClass<F extends Client, O extends Options> = new (
 export function initAndBind<F extends Client, O extends Options>(
   clientClass: ClientClass<F, O>,
   options: O,
-  transport: Transport,
-  newTransport?: NewTransport,
+  transport: NewTransport,
 ): void {
   if (options.debug === true) {
     if (IS_DEBUG_BUILD) {
@@ -40,6 +34,6 @@ export function initAndBind<F extends Client, O extends Options>(
     scope.update(options.initialScope);
   }
 
-  const client = new clientClass(options, transport, newTransport);
+  const client = new clientClass(options, transport);
   hub.bindClient(client);
 }
