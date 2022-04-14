@@ -56,7 +56,7 @@ describe('SDK', () => {
         new MockIntegration('MockIntegration 2'),
       ];
       const options = { dsn: PUBLIC_DSN, defaultIntegrations: DEFAULT_INTEGRATIONS };
-      initAndBind(TestClient, options, setupTestTransport(options).transport);
+      initAndBind(TestClient, options, setupTestTransport(options));
       expect((DEFAULT_INTEGRATIONS[0].setupOnce as jest.Mock).mock.calls.length).toBe(1);
       expect((DEFAULT_INTEGRATIONS[1].setupOnce as jest.Mock).mock.calls.length).toBe(1);
     });
@@ -67,7 +67,7 @@ describe('SDK', () => {
         new MockIntegration('MockIntegration 2'),
       ];
       const options: TestOptions = { dsn: PUBLIC_DSN, defaultIntegrations: false };
-      initAndBind(TestClient, options, setupTestTransport(options).transport);
+      initAndBind(TestClient, options, setupTestTransport(options));
       expect((DEFAULT_INTEGRATIONS[0].setupOnce as jest.Mock).mock.calls.length).toBe(0);
       expect((DEFAULT_INTEGRATIONS[1].setupOnce as jest.Mock).mock.calls.length).toBe(0);
     });
@@ -78,7 +78,7 @@ describe('SDK', () => {
         new MockIntegration('MockIntegration 2'),
       ];
       const options = { dsn: PUBLIC_DSN, integrations };
-      initAndBind(TestClient, options, setupTestTransport(options).transport);
+      initAndBind(TestClient, options, setupTestTransport(options));
       expect((integrations[0].setupOnce as jest.Mock).mock.calls.length).toBe(1);
       expect((integrations[1].setupOnce as jest.Mock).mock.calls.length).toBe(1);
     });
@@ -93,7 +93,7 @@ describe('SDK', () => {
         new MockIntegration('MockIntegration 3'),
       ];
       const options = { dsn: PUBLIC_DSN, defaultIntegrations: DEFAULT_INTEGRATIONS, integrations };
-      initAndBind(TestClient, options, setupTestTransport(options).transport);
+      initAndBind(TestClient, options, setupTestTransport(options));
       // 'MockIntegration 1' should be overridden by the one with the same name provided through options
       expect((DEFAULT_INTEGRATIONS[0].setupOnce as jest.Mock).mock.calls.length).toBe(0);
       expect((DEFAULT_INTEGRATIONS[1].setupOnce as jest.Mock).mock.calls.length).toBe(1);
@@ -112,7 +112,7 @@ describe('SDK', () => {
         dsn: PUBLIC_DSN,
         integrations: (integrations: Integration[]) => integrations.slice(0, 1).concat(newIntegration),
       };
-      initAndBind(TestClient, options, setupTestTransport(options).transport);
+      initAndBind(TestClient, options, setupTestTransport(options));
       expect((DEFAULT_INTEGRATIONS[0].setupOnce as jest.Mock).mock.calls.length).toBe(1);
       expect((newIntegration.setupOnce as jest.Mock).mock.calls.length).toBe(1);
       expect((DEFAULT_INTEGRATIONS[1].setupOnce as jest.Mock).mock.calls.length).toBe(0);
