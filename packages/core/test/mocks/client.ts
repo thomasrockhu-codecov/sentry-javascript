@@ -83,7 +83,7 @@ export function setupTestTransport(options: TestOptions): NewTransport {
   }
 
   if (options.transport) {
-    return this._options.transport;
+    return options.transport;
   }
 
   return noop;
